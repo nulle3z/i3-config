@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# 判断无线网口是否被关闭；判断无线网口是否连接任意无线网络
-
-# 获取无线接口
+# Get wireless interface
 WIFI_INTERFACE=$(iw dev | grep Interface | awk '{print $2}' | head -1)
 
-# 获取连接信息
+# Get connect info
 get_ssid() {
-    iw dev "$WIFI_INTERFACE" info | grep ssid | awk '{print $2}'
+    # iw dev "$WIFI_INTERFACE" info | grep ssid | awk '{print $2,$3}'
+	iw dev "$WIFI_INTERFACE" info | grep "ssid" | sed -E 's/^.*ssid[[:space:]]+//'
 }
 
 get_signal() {
@@ -15,14 +14,16 @@ get_signal() {
 }
 
 get_ip() {
-    ip -4 addr show "$WIFI_INTERFACE" | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | head -1
+	ip -4 addr show "$WIFI_INTERFACE" | grep -oP '(?<=inet\s)\d+(\.\d+){3}/\d+' | head -1
 }
 
 get_gateway() {
     ip route | grep default | grep "$WIFI_INTERFACE" | awk '{print $3}'
 }
 
-# 鼠标点击事件
+ip address | grep wlp1s0 | awk '{print $2}' | tail -n 1
+
+# Mouse check event
 if [ -n "$BLOCK_BUTTON" ]; then
     case "$BLOCK_BUTTON" in
         1)
@@ -41,7 +42,7 @@ if [ -n "$BLOCK_BUTTON" ]; then
     esac
 fi
 
-# 正常显示
+# Normal display
 SSID=$(get_ssid)
 SIGNAL=$(get_signal)
 
