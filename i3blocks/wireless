@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# 判断无线网口是否被关闭；判断无线网口是否连接任意无线网络
+
+# 获取无线接口
+WIFI_INTERFACE=$(iw dev | grep Interface | awk '{print $2}' | head -1)
+
+# 获取连接信息
+get_ssid() {
+    iw dev "$WIFI_INTERFACE" info | grep ssid | awk '{print $2}'
+}
+
+get_signal() {
+    iw dev "$WIFI_INTERFACE" link | grep signal | awk '{print $2" dBm"}'
+}
+
+get_ip() {
+    ip -4 addr show "$WIFI_INTERFACE" | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | head -1
+}
+
+get_gateway() {
+    ip route | grep default | grep "$WIFI_INTERFACE" | awk '{print $3}'
+}
+
+# 鼠标点击事件
+if [ -n "$BLOCK_BUTTON" ]; then
+    case "$BLOCK_BUTTON" in
+        1)
+            DETAILS="SSID: $(get_ssid)\n"
+            DETAILS+="Signal: $(get_signal)\n"
+            DETAILS+="IP: $(get_ip)\n"
+            DETAILS+="Gateway: $(get_gateway)\n"
+            dunstify -t 8000 -u normal -i network-wireless "WiFi Details" "$DETAILS"
+            ;;
+        3)  # 右键：重新连接
+            nmcli device disconnect "$WIFI_INTERFACE" 2>/dev/null
+            sleep 2
+            nmcli device connect "$WIFI_INTERFACE" 2>/dev/null
+            dunstify -t 2000 -u normal "WiFi" "Reconnecting..."
+            ;;
+    esac
+fi
+
+# 正常显示
+SSID=$(get_ssid)
+SIGNAL=$(get_signal)
+
+if [ -n "$SSID" ]; then
+    echo "$SSID $SIGNAL"
+else
+    echo "Disconnected"
+fi
+

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# 获取无线网卡接口（通常是 wlan0 或 wlp*）
+interface=$(iw dev | grep Interface | awk '{print $2}' | head -n1)
+
+if [ -z "$interface" ]; then
+    echo "Not found any devices!"
+    exit 0
+fi
+
+# 检查连接状态
+if iw dev $interface link | grep -q "Not connected"; then
+    echo "down"
+    echo "down"
+    echo "#FF0000"  # 红色
+    exit 0
+fi
+
+# 获取连接信息
+essid=$(iw dev $interface link | grep SSID | awk '{print $2}')
+quality=$(iw dev $interface link | grep signal | awk '{print $2}' | sed 's/signal: //')
+ip=$(ip addr show $interface | grep inet | awk '{print $2}' | cut -d/ -f1 | head -n1)
+
+# 格式化输出
+echo "$essid $quality% $ip"
+echo "$essid $quality% $ip"
+if [ ${quality%%.*} -lt 30 ]; then
+    echo "#FFA500"  # 信号弱时橙色
+else
+    echo "#FFFFFF"  # 正常白色
+fi
+

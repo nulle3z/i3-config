@@ -1,0 +1,49 @@
+# i3blocks profile
+
+[wireless]
+command=~/.config/i3blocks/wireless
+interval=5
+label=WIRELESS: 
+# 点击事件：1=左键，2=中键，3=右键
+# signal=10  # 可选：信号更新
+
+[ethernet]
+command=~/.config/i3blocks/ethernet
+interval=5
+label=ETHERNET: 
+
+
+[battery]
+command=~/.config/i3blocks/battery
+interval=5
+label=BAT: 
+
+
+[disk]
+command=~/.config/i3blocks/disk
+interval=30
+label=DISK: 
+
+
+[load]
+command=~/.config/i3blocks/load
+interval=2
+label=LOAD: 
+
+
+[memory]
+command=~/.config/i3blocks/memory
+interval=3
+label=MEM: 
+
+
+[time]
+command=date '+%Y-%m-%d %a %H:%M'
+interval=1
+label=
+
+
+[volume]
+command=~/.config/i3blocks/volume
+interval=1
+signal=1
