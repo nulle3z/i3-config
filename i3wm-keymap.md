@@ -1,9 +1,4 @@
-# Gentoo Linux Panasonic CF-33 i3wm 快捷键一览
-
-在你的 **shell** 内输入以下命令以快速安装 **i3-wm**
-```bash
-emerge --ask x11-wm/i3 x11-misc/i3blocks x11-misc/i3lock x11-misc/sddm x11-terms/alacritty media-gfx/feh x11-misc/rofi
-```
+# This i3wm Keyboard Shortcuts Overview
 
 ## 基础操作
 
