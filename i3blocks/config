@@ -4,8 +4,7 @@
 command=~/.config/i3blocks/wireless
 interval=5
 label=WIRELESS: 
-# 点击事件：1=左键，2=中键，3=右键
-# signal=10  # 可选：信号更新
+
 
 [ETHERNET]
 command=~/.config/i3blocks/ethernet
