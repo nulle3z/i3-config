@@ -1,14 +1,18 @@
 #!/bin/bash
 
-# Get wireless interface
-WIFI_INTERFACE=$(iw dev | grep Interface | awk '{print $2}' | head -1)
+interface=$(iw dev | grep Interface | awk '{print $2}' | head -n1)
 
-# Check if wireless interface exists and is up
-check_interface_status() {
-    if [ -z "$WIFI_INTERFACE" ]; then
-        echo "down"
+COLOR_RED="#FF0000"
+COLOR_WHITE="#FFFFFF"
+COLOR_GREEN="#00FF00"
+COLOR_ORANGE="#FFA500"
+
+# 获取无线接口状态（up/down）
+get_interface_state() {
+    if [ -z "$interface" ]; then
+        echo "missing"
     else
-        local state=$(ip link show "$WIFI_INTERFACE" 2>/dev/null | grep -o "state UP" || echo "state DOWN")
+        local state=$(ip link show "$interface" 2>/dev/null | grep -o "state UP" || echo "state DOWN")
         if [[ "$state" == *"UP"* ]]; then
             echo "up"
         else
@@ -16,86 +20,103 @@ check_interface_status() {
         fi
     fi
 }
-WIFI_INTERFACE_STATUS=$(check_interface_status)
 
-# Get connect info
-get_ssid() {
-    if [ "$WIFI_INTERFACE_STATUS" = "down" ]; then
-        echo ""
-    else
-        iw dev "$WIFI_INTERFACE" info 2>/dev/null | grep "ssid" | sed -E 's/^.*ssid[[:space:]]+//'
-    fi
+# 获取连接信息
+get_essid() {
+    iw dev "$interface" link 2>/dev/null | grep SSID | awk '{print $2,$3}'
+}
+
+get_bitrate() {
+    iw dev "$interface" link 2>/dev/null | grep "tx bitrate" | awk '{print $3" "$4}' | sed 's|Mb/s|Mbps|'
 }
 
 get_signal() {
-    if [ "$WIFI_INTERFACE_STATUS" = "down" ]; then
-        echo ""
-    else
-        iw dev "$WIFI_INTERFACE" link 2>/dev/null | grep signal | awk '{print $2" dBm"}'
-    fi
+    iw dev "$interface" link 2>/dev/null | grep signal | awk '{print $2" dBm"}'
 }
 
 get_ip() {
-    if [ "$WIFI_INTERFACE_STATUS" = "down" ]; then
-        echo ""
-    else
-        ip -4 addr show "$WIFI_INTERFACE" 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}/\d+' | head -1
-    fi
+	ip -4 addr show wlp1s0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}/\d+'
 }
 
-get_gateway() {
-    if [ "$WIFI_INTERFACE_STATUS" = "down" ]; then
-        echo ""
-    else
-        ip route 2>/dev/null | grep default | grep "$WIFI_INTERFACE" | awk '{print $3}'
-    fi
+# 显示无线网络密码
+get_ssid_psk() {
+	SSID=$(iw dev wlp1s0 link | grep -i ssid | awk '{$1=""; print substr($0,2)}')
+	sudo grep -h "^psk=" "/etc/NetworkManager/system-connections/$SSID.nmconnection" | cut -d= -f2
 }
 
-# Mouse check event
+
+# 鼠标事件处理
 if [ -n "$BLOCK_BUTTON" ]; then
     case "$BLOCK_BUTTON" in
-        1)
-            if [ "$WIFI_INTERFACE_STATUS" = "down" ]; then
-                DETAILS="WiFi Interface is off!"
+        1)  # 左键
+            if [ -z "$interface" ]; then
+                DETAILS="No wireless device found!"
+            elif [ "$(get_interface_state)" = "down" ]; then
+                DETAILS="WiFi interface is OFF"
             else
-                DETAILS="SSID: $(get_ssid)\n"
-                DETAILS+="Signal: $(get_signal)\n"
-                DETAILS+="IP: $(get_ip)\n"
-                DETAILS+="Gateway: $(get_gateway)\n"
+                ESSID=$(get_essid)
+                if [ -n "$ESSID" ]; then
+                    DETAILS="SSID: $ESSID\n"
+                    DETAILS+="Signal: $(get_signal)\n"
+                    DETAILS+="Bitrate: $(get_bitrate)\n"
+                    DETAILS+="IP: $(get_ip)\n"
+                    DETAILS+="SSID psk: $(get_ssid_psk)\n"
+                else
+                    DETAILS="Disconnected"
+                fi
             fi
             dunstify -t 8000 -u normal -i network-wireless "WiFi Details" "$DETAILS"
             ;;
-        3)  # 右键：重启接口（如果关闭则开启，如果开启则重启）
-            if [ "$WIFI_INTERFACE_STATUS" = "down" ]; then
-                # 接口关闭，尝试开启
-                if [ -n "$WIFI_INTERFACE" ]; then
-                    sudo ip link set "$WIFI_INTERFACE" up 2>/dev/null
-                    dunstify -t 2000 -u normal "WiFi" "Interface $WIFI_INTERFACE enabled..."
-                else
-                    dunstify -t 2000 -u critical "WiFi" "No wireless interface found!"
-                fi
+        2)  # 中键
+            if command -v wpa_gui &>/dev/null; then
+                wpa_gui &
             else
-                # 接口开启，重启接口
-                sudo ip link set "$WIFI_INTERFACE" down 2>/dev/null
-                sleep 1
-                sudo ip link set "$WIFI_INTERFACE" up 2>/dev/null
-                dunstify -t 2000 -u normal "WiFi" "Interface $WIFI_INTERFACE restarting..."
+                dunstify -t 2000 -u critical "WiFi" "wpa_gui not found"
+            fi
+            ;;
+        3)  # 右键
+            if [ -z "$interface" ]; then
+                dunstify -t 2000 -u critical "WiFi" "No wireless interface found!"
+            else
+                CURRENT_STATE=$(get_interface_state)
+                if [ "$CURRENT_STATE" = "up" ]; then
+                    sudo ip link set "$interface" down
+					#nmcli device up $interface
+                    dunstify -t 2000 -u normal "WiFi" "Interface $interface turned OFF"
+                else
+                    sudo ip link set "$interface" up
+					#nmcli device down $interface
+                    dunstify -t 2000 -u normal "WiFi" "Interface $interface turned ON"
+                fi
             fi
             ;;
     esac
+    exit 0
 fi
 
-# Normal display
-SSID=$(get_ssid)
-SIGNAL=$(get_signal)
-if [ "$WIFI_INTERFACE_STATUS" = "down" ]; then
-    echo "#FF0000"
+# 正常显示（i3blocks 输出）
+if [ -z "$interface" ]; then
+    # 未找到无线设备 → 红色
+    echo "No Device"
+    echo "No Device"
+    echo "$COLOR_RED"
+elif [ "$(get_interface_state)" = "down" ]; then
+    # 设备关闭 → 白色
     echo "WiFi Off"
-elif [ -n "$SSID" ]; then
-    echo "#FFFF00"
-    echo "$SSID $SIGNAL"
+    echo "WiFi Off"
+    echo "$COLOR_WHITE"
 else
-    echo "#FF0000"
-    echo "Disconnected"
+    # 设备开启
+    ESSID=$(get_essid)
+    if [ -n "$ESSID" ]; then
+        BITRATE=$(get_bitrate)
+        echo "$ESSID $BITRATE"
+        echo "$ESSID $BITRATE"
+        echo "$COLOR_GREEN"
+    else
+        echo "Disconnected"
+        echo "Disconnected"
+        echo "$COLOR_WHITE"
+    fi
 fi
 

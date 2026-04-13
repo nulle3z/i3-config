@@ -12,7 +12,7 @@ fi
 if iw dev $interface link | grep -q "Not connected"; then
     echo "down"
     echo "down"
-    echo "#FF0000"  # 红色
+    echo "#FF0000"
     exit 0
 fi
 

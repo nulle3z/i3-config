@@ -1,0 +1,27 @@
+#!/bin/bash
+# 有线网络状态脚本
+
+# 获取有线网卡接口（通常是 eth0 或 enp*）
+interface=$(ip link show | grep -E "^[0-9]+: en" | awk -F': ' '{print $2}' | head -n1)
+
+if [ -z "$interface" ]; then
+    echo "No found any devices!"
+    exit 0
+fi
+
+# 检查是否连接
+if ip link show $interface | grep -q "state UP"; then
+    ip=$(ip addr show $interface | grep inet | awk '{print $2}' | cut -d/ -f1 | head -n1)
+    speed=$(ethtool $interface 2>/dev/null | grep Speed | awk '{print $2}')
+    if [ -z "$speed" ]; then
+        speed="Unknow"
+    fi
+    echo "$ip $speed"
+    echo "$ip $speed"
+    echo "#00FF00"
+else
+    echo "down"
+    echo "down"
+    echo "#FF0000"
+fi
+
