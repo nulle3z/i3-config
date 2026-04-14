@@ -72,14 +72,14 @@ if [ -n "$BLOCK_BUTTON" ]; then
     # 鼠标点击事件
     case "$BLOCK_BUTTON" in
         1)  # 左键点击：显示详细信息
-            DETAILS="Status: $(get_status)\n"
-            DETAILS+="Interface: $INTERFACE\n"
-            DETAILS+="IP Address: $(get_ip)\n"
-            DETAILS+="Gateway: $(get_gateway)\n"
-            DETAILS+="Netmask: $(get_netmask_full) (CIDR: /$(get_netmask))\n"
-            DETAILS+="DNS: $(get_dns)\n"
-            DETAILS+="MAC Address: $(get_mac)\n"
-            DETAILS+="Speed: $(get_speed)\n"
+            DETAILS="  Status: $(get_status)\n"
+            DETAILS+="  Interface: $INTERFACE\n"
+            DETAILS+="  IP Address: $(get_ip)\n"
+            DETAILS+="  Gateway: $(get_gateway)\n"
+            DETAILS+="  Netmask: $(get_netmask_full) (CIDR: /$(get_netmask))\n"
+            DETAILS+="  DNS: $(get_dns)\n"
+            DETAILS+="  MAC Address: $(get_mac)\n"
+            DETAILS+="  Speed: $(get_speed)\n"
 
             # 使用 dunst 发送通知（根据你之前的问题）
             dunstify -t 8000 -u normal -i network-wired "Ethernet Details" "$DETAILS"

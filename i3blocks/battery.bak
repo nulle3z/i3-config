@@ -1,0 +1,53 @@
+#!/bin/bash
+
+battery=$(ls /sys/class/power_supply/ | grep BAT | head -n1)
+
+if [ -z "$battery" ]; then
+    echo "AC"
+    exit 0
+fi
+
+status=$(cat /sys/class/power_supply/$battery/status)
+capacity=$(cat /sys/class/power_supply/$battery/capacity)
+current_now=$(cat /sys/class/power_supply/$battery/current_now 2>/dev/null)
+voltage_now=$(cat /sys/class/power_supply/$battery/voltage_now 2>/dev/null)
+
+# 计算功耗（如果可用）
+if [ -n "$current_now" ] && [ -n "$voltage_now" ]; then
+    consumption=$(echo "scale=1; ($current_now * $voltage_now) / 1000000000000" | bc)
+    consumption=" ${consumption}W"
+else
+    consumption=""
+fi
+
+# Set status icon
+case $status in
+    "Charging")
+        icon="Charging"
+        ;;
+    "Discharging")
+        icon="Discharging"
+        ;;
+    "Full")
+        icon="Full"
+        ;;
+    *)
+        icon="Not Charging"
+        ;;
+esac
+
+# Set colors
+if [ $capacity -lt 25 ]; then
+    color="#FF0000"  # Red
+elif [ $capacity -lt 50 ]; then
+    color="#FFFF00"  # Yellow
+elif [ $capacity -lt 75 ]; then
+    color="#FFA500"  # Orange
+else
+    color="#008000"  # Green
+fi
+
+echo "$icon $capacity%$consumption"
+echo "$icon $capacity%$consumption"
+echo "$color"
+
