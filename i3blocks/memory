@@ -19,7 +19,7 @@ else
     color="#90ee90"  # Green
 fi
 
-echo "MEM $used/$total ($used_percent%)"
-echo "MEM $used/$total ($used_percent%)"
+echo "$used/$total ($used_percent%)"
+echo "$used/$total ($used_percent%)"
 echo "$color"
 

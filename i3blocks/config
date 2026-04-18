@@ -1,37 +1,37 @@
 # i3blocks profile
 
 [WIRELESS]
-command=~/.config/i3blocks/wireless
+command=./wireless
 interval=5
 label=WIRELESS: 
 
 
 [ETHERNET]
-command=~/.config/i3blocks/ethernet
+command=./ethernet
 interval=5
 label=ETHERNET: 
 
 
 [BATTERY]
-command=~/.config/i3blocks/battery
+command=./battery
 interval=5
 label=BAT: 
 
 
 [DISK]
-command=~/.config/i3blocks/disk
+command=./disk
 interval=30
 label=DISK: 
 
 
 [LOAD]
-command=~/.config/i3blocks/load
+command=./load
 interval=2
 label=LOAD: 
 
 
 [MEMORY]
-command=~/.config/i3blocks/memory
+command=./memory
 interval=3
 label=MEM: 
 
@@ -43,6 +43,6 @@ label=
 
 
 [VOLUME]
-command=~/.config/i3blocks/volume
+command=./volume
 interval=1
 signal=1

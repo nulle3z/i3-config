@@ -38,8 +38,9 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 # A highly configurable and lightweight notification daemon.
 exec --no-startup-id dunst
 
-# feh Wallpaper set
-exec_always --no-startup-id feh --bg-fill /home/eason/Pictures/lain/Blade\ Runner.png
+# Wallpaper set
+# exec_always --no-startup-id feh --bg-fill /home/eason/Pictures/lain/Blade\ Runner.png
+exec_always --no-startup-id xwallpaper --zoom $HOME/Pictures/misaka/150.jpg
 
 # xinput setting
 exec_always xinput set-prop "HUAWEI Mouse CD26 SE Mouse" "libinput Left Handed Enabled" 1
@@ -82,8 +83,11 @@ bindsym $mod+Shift+d exec --no-startup-id rofi -show run
 # 混合模式启动器（应用+窗口+命令）
 bindsym $mod+space exec --no-startup-id rofi -show combi -combi-modi "window#drun#run" -show-icons
 
+# 浏览器
+# bindsym $mod+Shift+f exec --no-startup-id rofi -show filebrowser
+
 # 文件浏览器模式
-bindsym $mod+Shift+f exec --no-startup-id rofi -show file-browser
+bindsym $mod+Shift+f exec --no-startup-id rofi -show filebrowser
 
 # SSH 连接管理
 bindsym $mod+Shift+s exec --no-startup-id rofi -show ssh
@@ -172,13 +176,13 @@ bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+# bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+bindsym $mod+Shift+e exec i3-msg exit
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
         # These bindings trigger as soon as you enter the resize mode
 
-        # Vim 风格键位（hjkl）
         # h: 缩小宽度   j: 增加高度   k: 缩小高度   l: 增加宽度
         bindsym h resize shrink width 10 px or 10 ppt
         bindsym j resize grow height 10 px or 10 ppt
