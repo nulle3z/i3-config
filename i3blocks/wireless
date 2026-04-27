@@ -77,11 +77,13 @@ if [ -n "$BLOCK_BUTTON" ]; then
             else
                 CURRENT_STATE=$(get_interface_state)
                 if [ "$CURRENT_STATE" = "up" ]; then
-                    sudo ip link set "$interface" down
                     dunstify -t 2000 -u normal "WiFi" "Interface $interface turned OFF"
+					# sudo nmcli device up $interface
+                    sudo ip link set "$interface" down
                 else
-                    sudo ip link set "$interface" up
                     dunstify -t 2000 -u normal "WiFi" "Interface $interface turned ON"
+					# sudo nmcli device down $interface
+                    sudo ip link set "$interface" up
                 fi
             fi
             ;;
